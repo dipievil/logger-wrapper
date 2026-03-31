@@ -1,3 +1,3 @@
-module github.com/dipievil/poa-shows-go/logger-wrapper
+module github.com/dipievil/logger-wrapper
 
 go 1.26.0
