@@ -156,19 +156,19 @@ func (l *Logger) Infof(msg string, args ...any) {
 // Errorf logs a formatted error message.
 func (l *Logger) Errorf(msg string, args ...any) {
 	message := fmt.Sprintf(msg, args...)
-	l.base.Error(message)
+	l.Error(message)
 }
 
 // Debugf logs a formatted debug message.
 func (l *Logger) Debugf(msg string, args ...any) {
 	message := fmt.Sprintf(msg, args...)
-	l.base.Debug(message)
+	l.Debug(message)
 }
 
 // Warnf logs a formatted warning message.
 func (l *Logger) Warnf(msg string, args ...any) {
 	message := fmt.Sprintf(msg, args...)
-	l.base.Warn(message)
+	l.Warn(message)
 }
 
 // sendNotification sends a notification using the configured Notifier, if available.
