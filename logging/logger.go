@@ -173,11 +173,13 @@ func (l *Logger) Warnf(msg string, args ...any) {
 
 // sendNotification sends a notification using the configured Notifier, if available.
 func (l *Logger) sendNotification(msg string) {
-    if l.notifier != nil {
-        go func(m string) {
-            if err := l.notifier.Notify(m); err != nil {
-                l.base.Error("failed to send notification", "error", err)
-            }
-        }(msg)
-    }
+	if l.notifier == nil {
+		return
+	}
+
+	go func(m string) {
+		if err := l.notifier.Notify(m); err != nil {
+			l.base.Error("Failed to send notification", "error", err)
+		}
+	}(msg)
 }
