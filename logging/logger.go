@@ -67,6 +67,10 @@ func NewLoggerWrapper(config LoggerConfig, opts ...LoggerOption) *Logger {
         opt(l)
     }
 
+	if l.notifier != nil {
+		l.base.Info("Gotify is set", "type", fmt.Sprintf("%T", l.notifier))
+	}
+
 	return l
 }
 
