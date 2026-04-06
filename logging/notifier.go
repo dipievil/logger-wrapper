@@ -17,10 +17,17 @@ type GotifyService struct {
 	Priority *int
 }
 
-// Validate checks the configuration of the GotifyService and ensures that it has the necessary information to send notifications.
+// Validate checks the configuration of the GotifyService.
+// It ensures that the URL and token are properly set and
+// that the priority is within the valid range. It also
+// checks if the Gotify server is reachable.
 func (g *GotifyService) Validate() (bool, error) {
 	if g == nil {
 		return false, fmt.Errorf("Notifier cannot be nil!")
+	}
+
+	if g.URL == "" && g.Token == "" {
+		return false, nil
 	}
 
 	if g.Title == "" {
