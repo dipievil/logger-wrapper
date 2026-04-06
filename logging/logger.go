@@ -39,9 +39,14 @@ type LoggerOption func(*Logger)
 func WithNotifier(n interfaces.Notifier) LoggerOption {
 	return func(l *Logger) {
 		if g, ok := n.(*GotifyService); ok {
-			if _, err := g.Validate(); err != nil {
+			isValid, err := g.Validate()
+			if err != nil {
 				l.err = err
 				return
+			}
+
+			if !isValid {
+				n = nil
 			}
 		}
 		l.notifier = n
