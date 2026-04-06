@@ -42,6 +42,10 @@ func (g *GotifyService) Validate() (bool, error) {
 	return true, nil
 }
 
+func (g *GotifyService) GetHost() string {
+	return g.URL
+}
+
 func (g *GotifyService) Notify(message string) error {
 
 	client := &http.Client{Timeout: 5 * time.Second}

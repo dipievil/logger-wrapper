@@ -20,6 +20,10 @@ func (m *MockNotifier) Notify(message string) error {
 	return nil
 }
 
+func (m *MockNotifier) GetHost() string {
+	return "http://localhost:8080"
+}
+
 type MockLogger struct {
 	base *slog.Logger
 }

@@ -83,3 +83,20 @@ func TestNotifierNotifyInvalidHost(t *testing.T) {
 		t.Log("Notification failed as expected with error:", err)
 	}
 }
+
+func TestGetHost(t *testing.T) {
+
+	host := "http://localhost:8080"
+
+	notifier := &GotifyService{
+		URL: host,
+	}
+
+	gotHost := notifier.GetHost()
+	expected := host
+	if gotHost != expected {
+		t.Errorf("Expected GetHost to return '%s', but got '%s'", expected, gotHost)
+	} else {
+		t.Log("GetHost returned the expected value")
+	}
+}
