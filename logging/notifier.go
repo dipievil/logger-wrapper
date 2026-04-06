@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -22,8 +23,6 @@ func (g *GotifyService) Validate() (bool, error) {
 		return false, fmt.Errorf("Notifier cannot be nil!")
 	}
 
-	defaultPriority := 5
-
 	if g.Title == "" {
 		g.Title = "Logger Wrapper Notification"
 	}
@@ -32,12 +31,20 @@ func (g *GotifyService) Validate() (bool, error) {
 		return false, fmt.Errorf("No Gotify URL is set for sending notifications with provided token")
 	}
 
-	if g.Priority == nil || *g.Priority < 1 || *g.Priority > 10 {
-		g.Priority = &defaultPriority
-	}
-
 	if g.Token == "" && g.URL != "" {
 		return false, fmt.Errorf("Gotify token is required for sending notifications to %s", g.URL)
+	}
+
+	g.URL = strings.TrimRight(g.URL, "/")
+
+	err := g.checkUrl()
+	if err != nil {
+		return false, err
+	}
+
+	defaultPriority := 5
+	if g.Priority == nil || *g.Priority < 1 || *g.Priority > 10 {
+		g.Priority = &defaultPriority
 	}
 	return true, nil
 }
@@ -63,5 +70,20 @@ func (g *GotifyService) Notify(message string) error {
 		return err
 	}
 	defer resp.Body.Close()
+	return nil
+}
+
+func (g *GotifyService) checkUrl() error {
+	if g.URL != "" {
+		client := &http.Client{Timeout: 5 * time.Second}
+		resp, err := client.Get(g.URL + "/version")
+		if err != nil {
+			return fmt.Errorf("Failed to reach Gotify server at %s: %v", g.URL, err)
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			return fmt.Errorf("Gotify server at %s returned non-OK status: %s", g.URL, resp.Status)
+		}
+	}
 	return nil
 }

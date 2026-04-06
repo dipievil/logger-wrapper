@@ -1,6 +1,8 @@
 package logging
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 )
@@ -98,5 +100,35 @@ func TestGetHost(t *testing.T) {
 		t.Errorf("Expected GetHost to return '%s', but got '%s'", expected, gotHost)
 	} else {
 		t.Log("GetHost returned the expected value")
+	}
+}
+
+func TestCheckUrl(t *testing.T) {
+	tests := []struct {
+		name       string
+		statusCode int
+		wantErr    bool
+	}{
+		{"OK response", http.StatusOK, false},
+		{"Non-OK response", http.StatusInternalServerError, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(tt.statusCode)
+			}))
+			defer server.Close()
+
+			g := &GotifyService{URL: server.URL}
+			err := g.checkUrl()
+
+			if tt.wantErr && err == nil {
+				t.Error("expected error, got nil")
+			}
+			if !tt.wantErr && err != nil {
+				t.Errorf("unexpected error: %v", err)
+			}
+		})
 	}
 }

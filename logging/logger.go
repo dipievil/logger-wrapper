@@ -13,6 +13,7 @@ import (
 type Logger struct {
 	base     *slog.Logger
 	notifier interfaces.Notifier
+	err      error
 }
 
 // LoggerConfig holds the configuration for the Logger, including log level, build version, and environment.
@@ -38,7 +39,10 @@ type LoggerOption func(*Logger)
 func WithNotifier(n interfaces.Notifier) LoggerOption {
 	return func(l *Logger) {
 		if g, ok := n.(*GotifyService); ok {
-			g.Validate()
+			if _, err := g.Validate(); err != nil {
+				l.err = err
+				return
+			}
 		}
 		l.notifier = n
 	}
@@ -75,8 +79,8 @@ func NewLoggerWrapper(config LoggerConfig, opts ...LoggerOption) *Logger {
 		opt(l)
 	}
 
-	if l.notifier != nil {
-		l.base.Info("Gotify is set", "type", fmt.Sprintf("%T", l.notifier))
+	if l.err != nil {
+		panic(fmt.Sprintf("Failed to create logger: %v", l.err))
 	}
 
 	return l
