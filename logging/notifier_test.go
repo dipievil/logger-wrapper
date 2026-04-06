@@ -7,25 +7,20 @@ import (
 	"testing"
 )
 
-func TestNotifierValidate(t *testing.T) {
-	tests := []struct {
-		name     string
-		notifier *GotifyService
-		wantErr  bool
-	}{
+type NotifierValidate struct {
+	name       string
+	notifier   *GotifyService
+	wantErr    bool
+	validation bool
+}
+
+func TestNotifierValidateStatic(t *testing.T) {
+	tests := []NotifierValidate{
 		{
-			name:     "Nil notifier",
-			notifier: nil,
-			wantErr:  true,
-		},
-		{
-			name: "Valid notifier",
-			notifier: &GotifyService{
-				URL:   "http://localhost:8080",
-				Token: "testtoken",
-				Title: "Test Notification",
-			},
-			wantErr: false,
+			name:       "Nil notifier",
+			notifier:   nil,
+			wantErr:    true,
+			validation: false,
 		},
 		{
 			name: "Missing URL with token",
@@ -33,7 +28,8 @@ func TestNotifierValidate(t *testing.T) {
 				Token: "testtoken",
 				Title: "Test Notification",
 			},
-			wantErr: true,
+			wantErr:    true,
+			validation: false,
 		},
 		{
 			name: "Missing token with URL",
@@ -41,7 +37,51 @@ func TestNotifierValidate(t *testing.T) {
 				URL:   "http://localhost:8080",
 				Title: "Test Notification",
 			},
-			wantErr: true,
+			wantErr:    true,
+			validation: false,
+		},
+		{
+			name: "Missing url and token",
+			notifier: &GotifyService{
+				URL:   "",
+				Token: "",
+				Title: "Test Notification",
+			},
+			wantErr:    false, // Should not return error, just not configured
+			validation: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			got, err := tt.notifier.Validate()
+
+			if got != tt.validation {
+				t.Errorf("Expected validation %v but got %v", tt.validation, got)
+			}
+
+			if err == nil && tt.wantErr {
+				t.Errorf("Expected error but got success")
+			}
+			if err != nil && !tt.wantErr {
+				t.Errorf("Expected success but got error: %v", err)
+			}
+		})
+	}
+}
+
+func TestNotifierValidateHttp(t *testing.T) {
+	tests := []NotifierValidate{
+		{
+			name: "Valid notifier",
+			notifier: &GotifyService{
+				URL:   "http://localhost:8080",
+				Token: "testtoken",
+				Title: "Test Notification",
+			},
+			wantErr:    false,
+			validation: true,
 		},
 		{
 			name: "Invalid priority",
@@ -51,17 +91,31 @@ func TestNotifierValidate(t *testing.T) {
 				Title:    "Test Notification",
 				Priority: func() *int { p := 11; return &p }(),
 			},
-			wantErr: false, // Should default to 5
+			wantErr:    false, // Should default to 5
+			validation: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+			}))
+			defer server.Close()
+
+			tt.notifier.URL = server.URL
+
 			got, err := tt.notifier.Validate()
-			if got && tt.wantErr {
+
+			if got != tt.validation {
+				t.Errorf("Expected validation %v but got %v", tt.validation, got)
+			}
+
+			if err == nil && tt.wantErr {
 				t.Errorf("Expected error but got success")
 			}
-			if !got && !tt.wantErr {
+			if err != nil && !tt.wantErr {
 				t.Errorf("Expected success but got error: %v", err)
 			}
 		})
