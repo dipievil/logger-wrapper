@@ -149,8 +149,7 @@ func (l *Logger) Warn(msg string, args ...any) {
 // Infof logs a formatted informational message and notifies Gotify
 func (l *Logger) Infof(msg string, args ...any) {
 	message := fmt.Sprintf(msg, args...)
-	l.base.Info(message)
-	l.sendNotification(message)
+	l.Info(message)
 }
 
 // Errorf logs a formatted error message.
@@ -179,7 +178,8 @@ func (l *Logger) sendNotification(msg string) {
 
 	go func(m string) {
 		if err := l.notifier.Notify(m); err != nil {
-			l.base.Error("Failed to send notification", "error", err)
+			message := fmt.Sprintf("Failed to send notification %s", l.notifier.GetHost())
+			l.base.Error(message, "error", err)
 		}
 	}(msg)
 }
