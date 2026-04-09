@@ -101,7 +101,7 @@ The wrapper exposes the following methods:
 - **Infof(msg string, args ...any)**
     Used for general informational messages with formatted output that highlight the progress of the application at a coarse-grained level.
 - **Warnf(msg string, args ...any)**
-    Used for potentially harmful situations or important events with formatted output that are not errors but may require attention.    
+    Used for potentially harmful situations or important events with formatted output that are not errors but may require attention.
 - **Errorf(msg string, args ...any)**
     Used for error events with formatted output that might still allow the application to continue running.
 
