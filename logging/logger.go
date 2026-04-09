@@ -142,6 +142,11 @@ func (l *Logger) Debug(msg string, args ...any) {
 // Info logs an informational message and notifies Gotify if a notifier is configured.
 func (l *Logger) Info(msg string, args ...any) {
 	l.base.Info(msg, args...)
+}
+
+// InfoNotify logs an informational message and sends a notification without additional context.
+func (l *Logger) InfoNotify(msg string) {
+	l.Info(msg)
 	l.sendNotification(msg)
 }
 
@@ -153,6 +158,12 @@ func (l *Logger) Error(msg string, args ...any) {
 // Warn logs a warning message with optional arguments.
 func (l *Logger) Warn(msg string, args ...any) {
 	l.base.Warn(msg, args...)
+}
+
+// InfoNotifyf logs a formatted informational message and sends a notification without additional context.
+func (l *Logger) InfoNotifyf(msg string, args ...any) {
+	l.Infof(msg, args...)
+	l.sendNotification(fmt.Sprintf(msg, args...))
 }
 
 // Infof logs a formatted informational message and notifies Gotify
